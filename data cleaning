@@ -1,0 +1,26 @@
+import pandas as pd
+df = pd.read_csv('glassdoor_jobs.csv')
+
+#Salary Parsing
+#this line below takes out any -1 or bad data
+df = df[df['Salary Estimate'] != '-1']
+#this line takes out the 'glassdoor estimate'
+salary = df['Salary Estimate'].apply(lambda x: x.split('(')[0])
+#this line takes out the 'k' and the '£' sign
+minus_Kgbp = salary.apply(lambda x: x.replace('K','').replace('£',''))
+
+#Company Name Only
+df['company_txt'] = df.apply(lambda x: x['Company Name'] if x['Rating'] <0 else x['Company Name'][:-3], axis = 1)
+
+#age of company
+df['age'] = df.Founded.apply(lambda x: x if x <1 else 2020 - x)
+
+#parse job description
+#find out which jobs require python
+df['python_yn'] = df['Job Description'].apply(lambda x: 1 if 'python' in x.lower() else 0)
+df.python_yn.value_counts()
+#find out which jobs require excel
+df['excel'] = df['Job Description'].apply(lambda x: 1 if 'excel' in x.lower() else 0)
+df.excel.value_counts()
+
+df.to_csv('Salary_Data_Cleaned.csv')
